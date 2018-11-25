@@ -15,6 +15,8 @@
 #     5. Unpause container. -->> varlink method: UnpauseContainer()
 #     6. Stop container. -->> varlink method: StopContainer()
 #     7. Remove container. -->> valink method: RemoveContainer()
+#     8. Get non-exist image. -->> varlink error: ImageNotFound
+#     9. Get non-exist container. -->> varlink error: ContainerNotFound
 # ---------------------------------------------------------------
 
 # ------------------------ Global Variables -------------------------
@@ -98,3 +100,17 @@ rmv_result=`${CMD_PREFIX}RemoveContainer '{"name": "test"}'`
 verify "Remove container test with RemoveContainer()"
 echo ${rmv_result} | grep "${container_id}"
 verify "Container ID print"
+
+echo
+echo "Step-8: Get a non-exist image"
+geti_result=`${CMD_PREFIX}GetImage '{"name": "non-exist"}' 2>&1`
+verify "Get a non-exist image"
+echo ${geti_result} | grep "ImageNotFound"
+verify "Error io.podman.ImageNotFound returned"
+
+echo
+echo "Step-9: Get a non-exist container"
+getc_result=`${CMD_PREFIX}GetContainer '{"name": "non-exist"}' 2>&1`
+verify "Get a non-exist container"
+echo ${getc_result} | grep "ContainerNotFound"
+verify "Error io.podman.ContainerNotFound returned"

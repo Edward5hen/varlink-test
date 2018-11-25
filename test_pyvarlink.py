@@ -18,6 +18,8 @@ Test steps:
     7. Start container. -->> varlink method: StartContainer()
     8. Remove container. -->> valink method: RemoveContainer()
     9. Remove image. -->> varlink method: RemoveImage(), GetImage()
+    10. Get a non-exist image. -->> varlink error: ImageNotFound
+    11. Get a non-exist container. -->> varlink error: ContainerNotFound
 """
 
 import argparse
@@ -26,6 +28,7 @@ import subprocess
 import time
 
 import varlink
+from varlink import VarlinkError
 
 
 class TestPyVarlink(unittest.TestCase):
@@ -112,6 +115,17 @@ class TestPyVarlink(unittest.TestCase):
     def test_l_remove_image(self):
         self.assertEqual(len(self.conn.RemoveImage('alpine').image), 64)
         self.assertEqual(len(self.conn.ListImages().images), 0)
+
+    def test_m_get_non_exist_image(self):
+        with self.assertRaises(VarlinkError) as context:
+            self.conn.GetImage('non-exist')
+        self.assertTrue('io.podman.ImageNotFound' in str(context.exception))
+
+    def test_n_get_non_exist_container(self):
+        with self.assertRaises(VarlinkError) as context:
+            self.conn.GetContainer('non-exist')
+        self.assertTrue('io.podman.ContainerNotFound' in str(context.exception))
+
 
     @classmethod
     def tearDownClass(cls):
